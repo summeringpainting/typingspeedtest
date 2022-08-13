@@ -6,8 +6,6 @@ import threading
 def start(event):
     """Start the global timer."""
     global running
-    print("Started Time function")
-    print(textbox.get("1.0", 'end-1c'))
     if not running:
         running = True
         t = threading.Thread(target=time_thread)
@@ -19,6 +17,9 @@ def time_thread():
     """Then divide it by seconds to calculate WPM."""
     global running
     global counter
+    global wpm
+    a = threading.Thread(target=average)
+    a.start()
     while running:
         time.sleep(0.1)
         counter += 0.1
@@ -26,13 +27,34 @@ def time_thread():
         wpm = wps * 60
         speed.config(text=f"{wpm:.2f} WPM")
 
+avg_list = []
+
+
+def average():
+    """Calculate average based on WPM every two seconds"""
+    global running
+    global counter
+    global wpm
+    global avg_list
+    while running:
+        time.sleep(2)
+        avg_list.append(wpm)
+        print(avg_list)
+    aver = sum(avg_list[:-1]) / (len(avg_list) - 1)
+    return aver
+
 
 def reset():
-    """Reset timer."""
+    """Reset timer and global variables."""
     global running
+    global avg_list
     global counter
     running = False
     counter = 0
+
+    messagebox.showinfo(title="AVG WPM",
+                        message=average())
+    avg_list = []
     textbox.delete('1.0', 'end')
     speed.config(text="0.00 WPM")
 
